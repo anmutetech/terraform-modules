@@ -21,18 +21,13 @@ pipeline {
                  script{
                         dir("terraform")
                         {
-                            git "https://github.com/troy-ingram/week-24-project.git"
+                            git "https://github.com/anmutetech/terraform-modules.git"
                         }
                     }
                 }
             }
 
         stage('Plan') {
-            when {
-                not {
-                    equals expected: true, actual: params.destroy
-                }
-            }
             
             steps {
                 sh 'terraform init -input=false'
@@ -42,18 +37,7 @@ pipeline {
                 sh 'terraform show -no-color tfplan > tfplan.txt'
             }
         }
-        stage('Approval') {
-           when {
-               not {
-                   equals expected: true, actual: params.autoApprove
-               }
-               not {
-                    equals expected: true, actual: params.destroy
-                }
-           }
-           
-                
-            
+        stage('Approval') {            
 
            steps {
                script {
@@ -65,26 +49,11 @@ pipeline {
        }
 
         stage('Apply') {
-            when {
-                not {
-                    equals expected: true, actual: params.destroy
-                }
-            }
             
             steps {
                 sh "terraform apply -input=false tfplan"
             }
         }
-        
-        stage('Destroy') {
-            when {
-                equals expected: true, actual: params.destroy
-            }
-        
-        steps {
-           sh "terraform destroy --auto-approve"
-        }
-    }
 
   }
 }
